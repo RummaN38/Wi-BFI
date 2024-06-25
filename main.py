@@ -129,9 +129,17 @@ if __name__ == '__main__':
     v_matrices_all = []
     time_epoch_all = []
 
+    p = 0
+
     # Process each packet
-    for p in range(num_packet_to_process):
-        capture = packets.__next__()
+    while True:
+        try:
+            capture = packets.__next__()
+            p += 1
+        except:
+            break
+        # capture = packets.__next__()
+
 
         # Extract time epoch value
         time_epoch = capture.frame_info.time_epoch
@@ -143,8 +151,6 @@ if __name__ == '__main__':
         print('packet___________ ' + str(p) + '\n\n\n')
 
         # Extract header information from the raw frame data
-        # Header_rivision_dec = hex2dec(flip_hex(packet[0:2]))
-        # Header_pad_dec = hex2dec(flip_hex(packet[2:4]))
         Header_length_dec = hex2dec(flip_hex(packet[8:16]))
         i = Header_length_dec * 2
 
@@ -162,7 +168,7 @@ if __name__ == '__main__':
         if standard == "AX":
             packet_mimo_control = packet[(i + 52):(i + 62)]
             packet_mimo_control_binary = ''.join(format(int(char, 16), '04b') for char in flip_hex(packet_mimo_control))
-            codebook_info = packet_mimo_control_binary[30] 
+            codebook_info = packet_mimo_control_binary[30]
             packet_snr = packet[(i + 62):(i + 62 + 2*int(config[-1]))]
             frame_check_sequence = packet[-8:]
 

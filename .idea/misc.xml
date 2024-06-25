@@ -3,5 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="F_Sense" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="wi-bfi" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="F_Sense" project-jdk-type="Python SDK" />
 </project>

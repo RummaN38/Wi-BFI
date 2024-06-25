@@ -145,18 +145,18 @@ if __name__ == '__main__':
         # Extract header information from the raw frame data
         # Header_rivision_dec = hex2dec(flip_hex(packet[0:2]))
         # Header_pad_dec = hex2dec(flip_hex(packet[2:4]))
-        # Header_length_dec = hex2dec(flip_hex(packet[4:8]))
-        i = 144 * 2  # Header_length_dec * 2
+        Header_length_dec = hex2dec(flip_hex(packet[8:16]))
+        i = Header_length_dec * 2
 
         # Extract various fields from the frame
         Frame_Control_Field_hex = packet[i:(i + 4)]
-        packet_duration = packet[(i + 4):(i + 8)]
+        packet_duration = hex2dec(flip_hex(packet[(i + 4):(i + 8)]))
         packet_destination_mac = packet[(i + 8):(i + 20)]
         packet_sender_mac = packet[(i + 20):(i + 32)]
         packet_BSS_ID = packet[(i + 32):(i + 44)]
         packet_sequence_number = packet[(i + 44):(i + 48)]
-        packet_HE_category = packet[(i + 48):(i + 50)]
-        packet_CQI = packet[(i + 50):(i + 52)]
+        packet_HE_category = hex2dec(flip_hex(packet[(i + 48):(i + 50)]))
+        packet_CQI = hex2dec(flip_hex(packet[(i + 50):(i + 52)]))
 
         # Extract specific fields for AX or AC standard
         if standard == "AX":
@@ -263,8 +263,8 @@ if __name__ == '__main__':
             Feedback_angles_bin = ""
         if standard == "AC":
             #Feedback_angles = packet[(i + 60):(i + 60 + (length_angles_users * 2))]
-            Feedback_angles = packet[(i + 58 + 2*int(config[-1])):(len(packet) - 8)]
-            #bfm_report_length = packet[(i + 60 + length_angles_users * 2):(len(packet) - 8)]
+            bfm_report_length = packet[(i + 60 + length_angles_users * 2):(len(packet) - 8)]
+            Feedback_angles = packet[(i + 58 + 2 * int(config[-1])):(len(packet) - 8 - len(bfm_report_length))]
             Feedback_angles_splitted = np.array(wrap(Feedback_angles, 2))
             Feedback_angles_bin = ""
 

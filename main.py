@@ -55,6 +55,7 @@ if __name__ == '__main__':
     num_packet_to_process = int(args.num_packet_to_process)
     saved_vmatrices = 'vmatrix/' + args.saved_vmatrices
     saved_angles = 'bfa/' + args.saved_angles
+    saved_times = 'time_epoch/' + args.saved_angles
 
     # Check if mu-mimo is selected for AX standard
     if mimo == "MU" and standard == "AX":
@@ -111,31 +112,41 @@ if __name__ == '__main__':
             input_file=file_name,
             display_filter='wlan.he.mimo.feedback_type==SU && wlan.addr==%s' % (MAC),
             use_json=True,
-            include_raw=True
+            include_raw=True,
+            keep_packets=True
         )._packets_from_tshark_sync()  # pcap_dir is the directory of my pcap file
     elif standard == "AC":
         packets = pyshark.FileCapture(
             input_file=file_name,
             display_filter='wlan.vht.mimo_control.feedbacktype==%s && wlan.addr==%s' % (mimo, MAC),
             use_json=True,
-            include_raw=True
+            include_raw=True,
+            keep_packets=True
         )._packets_from_tshark_sync()
 
     # Initialize lists to store feedback angles and v-matrices
     bfi_angles_all_packets = []
     v_matrices_all = []
+    time_epoch_all = []
 
     # Process each packet
     for p in range(num_packet_to_process):
-    	# Extract raw frame data from the packet
-        packet = packets.__next__().frame_raw.value
+        capture = packets.__next__()
+
+        # Extract time epoch value
+        time_epoch = capture.frame_info.time_epoch
+        time_epoch_all.append(time_epoch)
+        # print(time_epoch)
+
+        # Extract raw frame data from the packet
+        packet = capture.frame_raw.value
         print('packet___________ ' + str(p) + '\n\n\n')
 
         # Extract header information from the raw frame data
-        Header_rivision_dec = hex2dec(flip_hex(packet[0:2]))
-        Header_pad_dec = hex2dec(flip_hex(packet[2:4]))
-        Header_length_dec = hex2dec(flip_hex(packet[4:8]))
-        i = Header_length_dec * 2
+        # Header_rivision_dec = hex2dec(flip_hex(packet[0:2]))
+        # Header_pad_dec = hex2dec(flip_hex(packet[2:4]))
+        # Header_length_dec = hex2dec(flip_hex(packet[4:8]))
+        i = 144 * 2  # Header_length_dec * 2
 
         # Extract various fields from the frame
         Frame_Control_Field_hex = packet[i:(i + 4)]
@@ -280,3 +291,9 @@ if __name__ == '__main__':
     # Save v-matrices and angles to files
     np.save(saved_vmatrices, v_matrices_all)
     np.save(saved_angles, bfi_angles_all_packets)
+    np.save(saved_times, time_epoch_all)
+
+    import matplotlib.pyplot as plt
+    plt.plot(abs(v_matrices_all[0][:, 0, 0]))
+    plt.show()
+
